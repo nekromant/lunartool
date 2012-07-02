@@ -17,7 +17,7 @@ config = {
       TransformaticMkI = {
 	 group = {0,1,2,3,4,5,6,7,8,14,12,13},
 	 rickroll = { 14, 12, 13, 0, 1, 2 },
-	 inverted = { 2, 1, 0, 14 },
+	 inverted = { 2, 1, 0, 14, 13},
 	 prohibit = { 9, 10, 11 },
 	 outlets = " 12-14 - LEDS\n 0-2 - power control\n 3-8 - spare"
 	 }
