@@ -1,0 +1,6 @@
+Lunartool is a small tool written 100% in lua, that allows to quickly write
+command-line applets to interface with USB devices. 
+The core takes care of common commandline argument processing, handling multiple
+devices and forwards the real thing to small easy-to-write applets.
+It has initially been created to interface with a ton of homebrew devices based
+on VUSB and attiny2313 
