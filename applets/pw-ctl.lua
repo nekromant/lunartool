@@ -68,7 +68,7 @@ end
 function config.actions.reboot(i,dev,arg)
       print("Rebooting outlet " .. arg);
       config.actions.off(i,dev,arg)
-      os.execute("sleep 5");
+      os.execute("sleep 2");
       config.actions.on(i,dev,arg)
       
 end
