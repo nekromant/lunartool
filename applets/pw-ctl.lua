@@ -15,7 +15,8 @@ config = {
    actions={},
    hacks = { 
       TransformaticMkI = {
-	 group = {0,1,2,3,4,5,6,7,8,14},
+	 group = {0,1,2,3,4,5,6,7,8,14,12,13},
+	 rickroll = { 14, 12, 13, 0, 1, 2 },
 	 inverted = { 2, 1, 0, 14 },
 	 prohibit = { 9, 10, 11 },
 	 outlets = " 12-14 - LEDS\n 0-2 - power control\n 3-8 - spare"
@@ -65,16 +66,25 @@ function config.actions.off(i,dev,arg)
 end
 
 function config.actions.reboot(i,dev,arg)
-      print("Rebooting outlet " .. arg .. " off");
+      print("Rebooting outlet " .. arg);
       config.actions.off(i,dev,arg)
       os.execute("sleep 5");
       config.actions.on(i,dev,arg)
       
 end
 
+function config.actions.rickroll(i,dev,arg)
+   if nil ~= config.hacks[dev.serial] and nil ~= config.hacks[dev.serial].rickroll then
+      for _,outlet in pairs(config.hacks[dev.serial].rickroll) do
+	 config.actions.on(i,dev,outlet)
+	 os.execute("sleep 1")
+      end
+   end
+
+end
 
 function config.actions.all(i,dev,arg)
-   print("Turning all outlets " .. arg);
+   print("Setting all outlets to state: " .. arg);
    if nil ~= config.hacks[dev.serial] and nil ~= config.hacks[dev.serial].group then
       for _,n in pairs(config.hacks[dev.serial].group) do
 	 if 1==tonumber(arg) then
