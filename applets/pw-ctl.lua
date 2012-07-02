@@ -74,6 +74,8 @@ function config.actions.reboot(i,dev,arg)
 end
 
 function config.actions.rickroll(i,dev,arg)
+   config.actions.all(i,dev,0)
+   os.execute("sleep 1")
    if nil ~= config.hacks[dev.serial] and nil ~= config.hacks[dev.serial].rickroll then
       for _,outlet in pairs(config.hacks[dev.serial].rickroll) do
 	 config.actions.on(i,dev,outlet)
