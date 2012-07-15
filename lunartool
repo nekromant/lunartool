@@ -248,7 +248,8 @@ function lunartool.init()
    aname = applet;
    applet = applets .. "/" .. applet .. ".lua";
    dofile(applet);
-   tab = lunartool.getopt(arg, "d");
+   lunartool.args = lunartool.getopt(arg, "d");
+   tab = lunartool.args;
    if tab['help'] or tab['h'] then
       lunartool.printusage(aname);
       os.exit(1)
