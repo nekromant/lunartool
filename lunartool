@@ -237,7 +237,7 @@ function lunartool.init()
    applet = lunartool.basename(arg[0]);
    applets = os.getenv("LUNARTOOL_APPLETS")
    if (nil == applets) then
-      applets=/usr/share/lunartool
+      applets="/usr/share/lunartool"
    end
    if (applet == 'lunartool') then
       print("Don't call me directly. Plz");
