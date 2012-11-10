@@ -20,7 +20,15 @@ config = {
 	 inverted = { 2, 1, 0, 14, 13},
 	 prohibit = { 9, 10, 11 },
 	 outlets = " 12-14 - LEDS\n 0-2 - power control\n 3-8 - spare"
+	 },
+      alpha = {
+	 group = {0,1,2,3,4,5},
+	 rickroll = { 0, 1, 2, 3, 4, 5 },
+	 inverted = { 0, 1, 2, 3, 4, 5 },
+	 prohibit = { 9, 10, 11 },
+	 outlets = " 12-14 - LEDS\n 0-2 - power control\n 3-8 - spare"
 	 }
+
    }
 };
 
