@@ -2,6 +2,9 @@ DESTDIR=/usr/bin
 APPLETS_DIR=~/.lunartool
 APPLETS=pw-ctl
 
+all: 
+	@echo "Applets avaliable: $(APPLETS)"
+
 %-install: applets/%.lua
 	mkdir -p $(APPLETS_DIR)
 	echo cp -f $^ $(APPLETS_DIR)/$*.lua 
