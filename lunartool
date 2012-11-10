@@ -1,7 +1,6 @@
 #!/usr/bin/lua
 require('libusb');
 
-
 function table.val_to_str ( v )
    if "string" == type( v ) then
       v = string.gsub( v, "\n", "\\n" )
@@ -238,8 +237,7 @@ function lunartool.init()
    applet = lunartool.basename(arg[0]);
    applets = os.getenv("LUNARTOOL_APPLETS")
    if (nil == applets) then
-      print ("Oops, dunno where to find applets. Plz set LUNARTOOL_APPLETS");
-      os.exit(1);
+      applets=/usr/share/lunartool
    end
    if (applet == 'lunartool') then
       print("Don't call me directly. Plz");
