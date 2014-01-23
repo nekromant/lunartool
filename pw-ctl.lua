@@ -1,3 +1,9 @@
+require "lunarusb"
+
+if (config ~=nil) then
+   print("We're screwed!"..table.tostring(config));
+end
+
 -- Power Control Utility
 config = {
    description = "Outlet Control Utility",
@@ -31,7 +37,7 @@ config = {
       lefty = {
 	 group = {0,1,2,3,4,5,6,7,8,9,14,12,13,14,15,16},
 	 rickroll = { 14, 12, 13, 0, 1, 2 },
---	 prohibit = { 9, 10 },
+--	 prohibit = { 9, 10 },-
 	 outlets = " 12-14 - LEDS\n 0-2 - power control\n 3-8 - spare"
       }
 
@@ -142,3 +148,5 @@ end
 function config.actions.finish(i,dev)
     --  print("All done, have fun");
 end
+
+lunarusb.run();
