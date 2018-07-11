@@ -1,4 +1,5 @@
 #!/usr/bin/lua
+package.path="./?.lua;"..package.path;
 require "math"
 require "lunarusb"
 local bit = require "bit"
@@ -15,11 +16,18 @@ config = {
    commandline="oa";
    vid = 0x1d50,
    pid = 0x6032,
-   vendor = "ncrmnt.org",
-   product = "lam-ctl",  
+   vendor = "www.ncrmnt.org",
+   product = "OpenEtch",  
 
-   temp_setpoint = 180, -- Temperature setpoint
-   adc_chan = 2, -- ADC channel for hyst
+   hyst = { 
+      {
+	 adc = 1, --adc channel
+	 relay = 2, --relay to use
+	 inverted = 1, -- we use NTC thermistor
+      }
+   },
+
+   temp_setpoint = 160, -- Temperature setpoint
    -- Configuration
    hyst_spacing = 1,   
    Vin = 5.0, -- Logic level
@@ -82,43 +90,56 @@ end
 
 RQ_RELAY=0
 RQ_SET_HYST=1
-RQ_GET_ADC=2
-RQ_SET_LED=3
-RQ_SET_HYST_CHAN=4
+RQ_GET_HYST=2
+RQ_GET_ADC=3
+RQ_SET_LED=4
 
 
 --      libusb.control_msg(dev.hndl,requesttype,request,value,index,bytes,timeout)
 
 function config.actions.start(i,dev)
---   print("Detected: " .. dev.vendor .. "  " .. dev.product .. " " .. dev.serial);
+   print("Detected: " .. dev.vendor .. "  " .. dev.product .. " " .. dev.serial);
 end
 
 function config.actions.relay(i,dev,arg)
-      print("Setting relay state", arg);
-      returncode = libusb.control_msg(dev.hndl,
+   v = string.split(arg, ",");
+   returncode = libusb.control_msg(dev.hndl,
 			 USB_TYPE_VENDOR,
-			 RQ_RELAY,arg,0,0,6000)
+			 RQ_RELAY,v(1),v(2),0,6000)
 end
 
+
 function config.actions.on(i,dev,arg)
-   temp = tonumber(arg);
+   v = string.split(arg, ",");
+   id = v(0);
+   id = tonumber(id);
+   sp = v(1);
+   temp = sp;
    temp = volts_to_adc(resistance_to_volts(degrees_to_resistance(temp)))
    off = math.ceil(temp) - config.hyst_spacing;
    on  = math.floor(temp) + config.hyst_spacing;
+   enabled = 1;
    if (off < 0 or on < 0) then
-      return config.actions.off(i,dev,arg);
+      enabled = 0;
    end
-   config.actions.hystch(i,dev,config.adc_chan);
-   print("Set Point: " .. arg .. " Hysteresis values: on "..on.." off "..off);
-   returncode = libusb.control_msg(dev.hndl,
+
+   print("Hyst id: "..id.." Set Point: " .. sp .. " Hysteresis values: on "..on.." off "..off);
+   settings = string.format("%u %u %u %u %u %u ", 
+			    enabled, config.hyst[id].inverted, on, off, config.hyst[id].adc, config.hyst[id].relay)
+   libusb.control_msg(dev.hndl,
 			 USB_TYPE_VENDOR,
-			 RQ_SET_HYST,tonumber(on),tonumber(off),0,6000)
+			 RQ_SET_HYST,id,0,settings,6000)
+   returncode= 0
 end
 
 function config.actions.off(i,dev,arg)
-   returncode = libusb.control_msg(dev.hndl,
-				   USB_TYPE_VENDOR,
-				   RQ_SET_HYST,0,0,0,6000)
+   id = tonumber(arg);
+   settings = string.format("%u %u %u %u %u %u ", 
+			    0, config.hyst[id].inverted, 0, 0, config.hyst[id].adc, config.hyst[id].relay)
+   libusb.control_msg(dev.hndl,
+			 USB_TYPE_VENDOR,
+			 RQ_SET_HYST,id,0,settings,6000)
+   returncode = 0
 end
 
 function config.actions.hystch(i,dev,arg)
@@ -150,6 +171,31 @@ function config.actions.led(i,dev,arg)
 			     RQ_SET_LED,arg,0,32,6000)
 end
 
+
+
+function config.actions.toner(i,dev,arg)
+   config.actions.on(i,dev,"1,180")
+   config.actions.relay(i,dev,"0,1")
+end
+
+function config.actions.off(i,dev,arg)
+   print("Turning off the heater...")
+   config.actions.on(i,dev,"1,18")   
+   config.actions.relay(i,dev,"0,1")
+   print("Cooling down...")
+   repeat
+      v = libusb.control_msg(dev.hndl,
+			     bit.bor(USB_TYPE_VENDOR, 0x80),
+			     RQ_GET_ADC,config.hyst[1].adc,0,32,6000)
+      temp = resistance_to_degrees(volts_to_resistance(adc_to_volts(v))); 
+   until temp < 100
+   config.actions.relay(i,dev,"0,0")
+   print("Done!")
+end
+
+
+
+
 function config.actions.adcmon(i,dev,arg)
    a = {}
    print("ADC monitoring enabled");
@@ -159,8 +205,10 @@ function config.actions.adcmon(i,dev,arg)
 			       bit.bor(USB_TYPE_VENDOR, 0x80),
 			       RQ_GET_ADC,i,0,32,6000)
       io.write(resistance_to_degrees(volts_to_resistance(adc_to_volts(a[i]))).."  \t");
+      --io.write(a[i].."  \t");
+
    end
-      io.write("\r");
+      io.write("\n");
       io.flush();
    end
 end
@@ -178,5 +226,6 @@ function config.actions.do_plot(i,dev,arg)
       sleep(0.3);
    end
 end
+
 
 lunarusb.run()

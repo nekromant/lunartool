@@ -210,7 +210,6 @@ lunarusb.override_config = function(tab)
 end
 
 lunarusb.execute_applet = function(tab)
-   returncode = 0
    local devs = lunarusb.find_devices(config.vid, config.pid);
    local devs = lunarusb.string_filter(devs, config.vendor, config.product, config.serial)
    local r;
